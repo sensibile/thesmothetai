@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "source_version": "bd96f3aef49519b99dec0d15ff7c8ef5c2945b4c",
+  "files": {
+    ".taeguk/rules/approvals.md": "cc13ba9f6cfa6fb92f3c503e34a56c4f20324927749c0b87d567ab565ed48e68",
+    ".taeguk/rules/delivery.md": "66a66923fb3296d7f286d8845883c5678375b578e9fc00d0b7bc6bb7df80c68d",
+    ".taeguk/rules/governance.md": "98adb27880316ba215426c136e80335b00e1673fc41228330ec3141b30be0ffc",
+    ".taeguk/rules/index.md": "ad49ceaaa8430eaf4978e35292c892d04c4bbbd5f2141c807b1d9ea19734bc46",
+    ".taeguk/rules/mechanical-checks.md": "a9665883102ccee28e4cbb3194454c518841c073b02c17c19ce9c578176cfe4c",
+    ".taeguk/rules/proposals/index.md": "929ce04a0712932a4bf6366c10a7feb58415e798f3fcf8ac01efec577bfdd13b",
+    ".taeguk/rules/registry.toml": "6d743ee90b0f090fe3bcc87a8c7bb327fde627afbe3b51dc4ee10f2dabd943f3",
+    ".taeguk/rules/verification.md": "c840b4b75a05bd57a377ea1770c456e8b1087be323e3bb2469be6e351b77d55b"
+  }
+}

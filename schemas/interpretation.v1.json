@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://thesmothetai.local/schemas/interpretation.v1.json",
+  "title": "License interpretation submission (v1)",
+  "description": "Structured interpretation of one license text, identified by its exact content hash. Submitted by an agent; never approved automatically.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "source_hash", "license", "summary", "obligations", "uncertainties", "provenance"],
+  "properties": {
+    "schema_version": { "const": "1" },
+    "source_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "description": "Exact hash of the interpreted license text, as given by `thesmo interpret queue`."
+    },
+    "license": {
+      "type": "string",
+      "minLength": 1,
+      "description": "SPDX license identifier, or LicenseRef-* for non-SPDX texts."
+    },
+    "summary": { "type": "string", "minLength": 1, "maxLength": 2000 },
+    "obligations": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/obligation" }
+    },
+    "uncertainties": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/uncertainty" }
+    },
+    "provenance": { "$ref": "#/$defs/provenance" }
+  },
+  "$defs": {
+    "identifier": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+    "obligation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "triggers", "clause"],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "triggers": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/identifier" },
+          "description": "Conditions that must all hold for the obligation to apply. Empty means unconditional."
+        },
+        "clause": { "type": "string", "minLength": 1, "description": "Section or paragraph reference in the source text." },
+        "quote": { "type": "string", "maxLength": 1000, "description": "Verbatim excerpt supporting the obligation." }
+      }
+    },
+    "uncertainty": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["clause", "reason"],
+      "properties": {
+        "clause": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "model", "skill", "skill_version"],
+      "properties": {
+        "provider": { "enum": ["claude", "codex", "human", "other"] },
+        "model": { "type": "string", "minLength": 1 },
+        "skill": { "type": "string", "minLength": 1 },
+        "skill_version": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

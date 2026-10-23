@@ -1,0 +1,5 @@
+/.thesmothetai/
+/thesmo
+*.db
+*.db-wal
+*.db-shm

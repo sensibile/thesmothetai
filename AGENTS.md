@@ -4,6 +4,8 @@ License compliance through reusable decisions. Go CLI (`thesmo`) with a
 deterministic core; Claude Code and Codex act as interpreters through the
 skills in `skills/`.
 
+Read `.taeguk/rules/index.md` before planning and apply Taeguk rules to explicitly assigned workflows.
+
 ## Commands
 
 ```bash

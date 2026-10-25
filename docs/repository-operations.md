@@ -27,9 +27,10 @@ gate는 태극(sensibile/taeguk) main `062d95d`의 `scripts/codex_review_gate.py
 - 머지 방식: squash만 허용한다. 커밋 제목은 PR 제목, 본문은 PR 본문을 쓴다. 머지 후 브랜치를 자동 삭제한다. auto-merge를 허용한다.
 - 보안: Dependabot alerts와 security updates, CodeQL default setup(go), secret scanning과 push protection.
 - Codex 리뷰: ChatGPT Codex Connector 앱의 저장소 접근과 Codex cloud 설정의 Code review를 켰다. 이 설정은 GitHub가 아니라 ChatGPT 계정에서 관리한다.
+- 2026-10-26 추가: ruleset 필수 체크에 commit status `codex-review`(GitHub Actions, integration 15368)를 넣고, 머지 전에 PR 브랜치가 최신 `main`을 포함하도록 요구한다(`strict_required_status_checks_policy`). 태극과 같은 구성이다. gate가 PR #7에서 status를 게시하는 것을 확인한 뒤 적용했다. `no-auto-merge` label을 만들었다.
 
 필요 승인을 0으로 둔 이유는 작업자와 PR 작성자가 같은 계정이고 GitHub가 자기 PR 승인을 허용하지 않기 때문이다.
 
 ## 아직 걸지 않은 규칙
 
-`codex-review`는 gate workflow가 기본 브랜치에 들어간 뒤 ruleset 필수 체크로 추가한다. 기본 브랜치에 없는 workflow는 댓글 이벤트에 반응하지 않고, 존재하지 않는 체크를 필수로 걸면 머지가 영구히 막힌다. Go 검사(`go vet`, `go test`)는 아직 CI workflow가 없어 필수 체크가 아니다.
+Go 검사(`go vet`, `go test`)는 아직 CI workflow가 없어 필수 체크가 아니다. `gate-tests`는 gate 스크립트가 바뀔 때만 도는 workflow라 필수 체크로 걸지 않는다.

@@ -1,0 +1,19 @@
+name: Gate tests
+# Unit tests for the Codex review gate script (.github/workflows/codex-review-gate.yml).
+# The runner ships python3 and the script uses only the standard library.
+on:
+  pull_request:
+    paths: ['scripts/**', '.github/workflows/**']
+  push:
+    branches: [main]
+    paths: ['scripts/**', '.github/workflows/**']
+permissions:
+  contents: read
+jobs:
+  gate-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: python3 -m unittest discover -s scripts/tests -v

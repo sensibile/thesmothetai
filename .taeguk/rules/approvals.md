@@ -2,7 +2,7 @@
 
 ## Approval-2026-10-05
 
-근거: 이 대화에서 BOSS가 “규칙의 적용은 에이전트가 자유롭게 사용하고 규칙의 변경은 사용자 확인으로 하면 되겠다”라고 지시했다. GOV-001과 GOV-002의 기존 합의를 유지한다. 원래 기록은 [규칙 목록](https://github.com/sensibile/taeguk/blob/4bb6adb1f0c436956cc495e673565fe6d5af8773/docs/research/archive/규칙-목록.md)과 [규칙 관리](https://github.com/sensibile/taeguk/blob/4bb6adb1f0c436956cc495e673565fe6d5af8773/docs/research/archive/규칙-관리.md)에 보존한다.
+근거: 이 대화에서 BOSS가 “규칙의 적용은 에이전트가 자유롭게 사용하고 규칙의 변경은 사용자 확인으로 하면 되겠다”라고 지시했다. GOV-001과 GOV-002의 기존 합의를 유지한다. 원래 기록은 [규칙 목록](https://github.com/sensibile/taeguk/blob/8dbf62681faf14771c86b86dddc2d1b5f0378d33/docs/research/archive/규칙-목록.md)과 [규칙 관리](https://github.com/sensibile/taeguk/blob/8dbf62681faf14771c86b86dddc2d1b5f0378d33/docs/research/archive/규칙-관리.md)에 보존한다.
 
 ## Approval-2026-10-11
 
@@ -23,6 +23,16 @@
 같은 작업의 후속 확인: BOSS가 “Policy·Workflow·Executor <- 이것만 한정은 아니고 이런 식으로 구조화할 수 있는 것들을 다양하게 가져가는게 좋을 거 같은데”라고 명확히 했다. DEV-002 1.1의 예시는 비한정적이며 변하는 책임과 검증 가능한 계약에서 다른 경계도 탐색한다. 특정 패턴 목록 확장 자체를 목표로 삼지 않는다.
 
 ## Approval-2026-10-23
+
+근거: [의도·요구사항 기록 개정안](proposals/intent-requirement-records.md)을 제시한 뒤 BOSS가 다음과 같이 답했다. “1. 3개 다 괜찮은 거 같아. 2. 공통과 프로젝트 각각 다 있어야 할 거 같은데... 3. 동시 적용해서 차이점을 찾아봐야지 4. 요건 하면서 업데이트 하는 게 더 나을거 같고”
+
+범위: REQ-001 1.1의 의도 기록 분리, REQ-007 1.0의 요구사항 기록, MET-001 절차에 따른 승인 후 의미 변경·착수 후 재작업 측정 정의. 여러 저장소 제품은 공통 기록과 저장소별 기록을 함께 둔다. 의도 기록 조건은 초기값이며 요구사항 작업 중 관측한 사례로 개정안을 만든다. 조건의 의미 변경은 다시 BOSS 확인을 거친다.
+
+적용: 세 시험 프로젝트(hoplites, acropolis, thesmothetai)에 동시에 적용해 차이를 관측한다. 새로 시작하는 해당 작업부터 적용하고 진행 중 작업에는 소급하지 않는다. 시험 프로젝트 설치는 프로젝트별 dry-run 확인과 BOSS 승인을 거친다. 측정 임계값, 기계 검사, 자동 승인, 새 실행 권한은 포함하지 않는다.
+
+되돌림: accepted되지 않은 의도 기록 누적, 기존 설계·ADR 문서와의 반복, 기록 비용 대비 재작업 감소 없음, 요구사항 기록과 작업 계약의 기대값 불일치가 재검토 신호다. 자동 되돌림 조건은 아니다. 되돌릴 때는 REQ-001 1.0으로 복원하고 REQ-007을 retired로 바꾸며 시험 프로젝트의 기록은 보존한다.
+
+## Approval-2026-10-23-snapshot
 
 근거: 변경 전 diff를 제시한 뒤 BOSS가 “이 diff대로 규칙 문서 변경을 승인해. approvals.md에 승인 기록 남기고 PR #3에 커밋·push해줘”라고 지시했다. 인용문의 PR #3은 [sensibile/taeguk#3](https://github.com/sensibile/taeguk/pull/3)이다.
 

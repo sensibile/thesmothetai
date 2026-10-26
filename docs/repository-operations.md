@@ -12,13 +12,13 @@ GitHub 저장소 `sensibile/thesmothetai`의 설정과 PR 절차를 기록한다
    - `has_unresolved_findings: null`이면, 같은 head 커밋에 대한 Codex의 최신 결과 댓글이 "Didn't find any major issues"이고 Codex가 시작한 미해결 리뷰 thread가 0개일 때만 success다.
    - 시간이 지나도 판정은 바뀌지 않는다. Codex가 그 head를 리뷰하지 않으면 pending에 머문다.
    - 댓글이나 status 조회가 실패해 근거를 읽지 못하면 pending을 게시한 뒤 실패로 끝난다. 같은 head의 이전 success가 바뀐 리뷰 대신 머지 조건을 채우지 않게 하기 위해서다.
-   - Codex 요약 댓글이 삭제되거나 PR base가 바뀌면 gate가 이전 리뷰를 무효로 표시하는 댓글(head 표식 포함)을 남긴다. 무효 표시 이후 Codex가 요약을 갱신해야 다시 판정한다.
+   - Codex 요약 댓글이 삭제되거나 PR base가 바뀌면 gate가 이전 리뷰를 무효로 표시하는 댓글(head 표식 포함)을 남긴다. 무효 표시 이후 Codex가 요약을 갱신해야 다시 판정한다. 무효 표시 댓글을 남기지 못하면 `record` job이 pending을 게시한 뒤 실패로 끝난다.
 5. 리뷰 요청은 PR을 맡은 세션이 BOSS 계정으로 한다. Codex는 `github-actions[bot]`의 요청에는 응답하지 않았고(태극 PR #3, archon PR #12), 사람 계정 요청에는 13초~2분 안에 응답했다. 새 커밋을 push하면 Codex가 "New commits" 트리거로 다시 리뷰한다. 세션은 다음 경우에 그 head에 `@codex review`를 한 번 남긴다: PR을 열고 2분 안에 리뷰 요약이 붙지 않았을 때(3단계), 새 커밋을 push했을 때, gate가 무효 표시 댓글을 남겼을 때. 그 head에 대한 Codex 결과 댓글이 이미 있거나 리뷰가 `running`이면 남기지 않는다. 요청 뒤 10분 넘게 Codex가 시작하지 않거나 `running`에서 멈추면 한 번 더 요청하고, 그래도 응답이 없으면 BOSS에게 보고한다. 멈춤에는 Auto-fix 이벤트가 오지 않으므로 세션이 직접 다시 확인한다. 응답이 없다고 리뷰 없이 머지하지 않는다.
 6. 머지도 PR을 맡은 세션이 한다. PR head의 `codex-review`가 success이고 미해결 리뷰 thread가 없으면 `gh pr merge <번호> --squash --auto --match-head-commit <리뷰한 head SHA>`로 auto-merge를 켠다. 머지는 리뷰한 커밋으로 고정되고, 나머지 필수 체크가 통과하면 GitHub가 머지한다. draft PR이나 `no-auto-merge` label이 붙은 PR에는 켜지 않는다. 세션이 없는 PR은 `codex-review`가 success여도 사람이 머지할 때까지 대기한다.
 
 CodeQL default setup이 PR을 분석하지 않아 머지가 막히면 빈 커밋을 push해 분석을 다시 실행한다. 저장소 첫 설정 직후 연 PR에서 한 번 발생했다.
 
-gate는 태극(sensibile/taeguk) main `cfabbe9`의 `scripts/codex_review_gate.py`, `tests/test_codex_review_gate.py`(여기서는 `scripts/tests/`), `.github/workflows/codex-review-gate.yml`을 그대로 가져왔다. gate workflow는 `pull_request_target`과 `issue_comment`로만 실행된다. 두 이벤트 모두 기본 브랜치의 workflow와 스크립트를 실행하므로 PR이 자기 판정 코드를 바꿀 수 없다. 그래서 gate를 처음 넣는 PR에서는 gate가 돌지 않는다. 요약 댓글의 상태 표식은 Codex의 공개 API가 아니다. 형식이 바뀌어 읽을 수 없으면 gate는 pending에 머물고, 사람이 Codex 결과를 확인해 처리한다. gate는 저장소 writer를 신뢰하는 전제의 자동화이며 writer에 대한 보안 경계는 아니다. fork PR과 기본 브랜치가 아닌 base로 향하는 PR은 처리하지 않는다. 스크립트 단위 테스트는 `.github/workflows/gate-tests.yml`이 돌린다.
+gate는 태극(sensibile/taeguk) main `f761a32`의 `scripts/codex_review_gate.py`, `tests/test_codex_review_gate.py`(여기서는 `scripts/tests/`), `.github/workflows/codex-review-gate.yml`을 그대로 가져왔다. gate workflow는 `pull_request_target`과 `issue_comment`로만 실행된다. 두 이벤트 모두 기본 브랜치의 workflow와 스크립트를 실행하므로 PR이 자기 판정 코드를 바꿀 수 없다. 그래서 gate를 처음 넣는 PR에서는 gate가 돌지 않는다. 요약 댓글의 상태 표식은 Codex의 공개 API가 아니다. 형식이 바뀌어 읽을 수 없으면 gate는 pending에 머물고, 사람이 Codex 결과를 확인해 처리한다. gate는 저장소 writer를 신뢰하는 전제의 자동화이며 writer에 대한 보안 경계는 아니다. fork PR과 기본 브랜치가 아닌 base로 향하는 PR은 처리하지 않는다. 스크립트 단위 테스트는 `.github/workflows/gate-tests.yml`이 돌린다.
 
 ## GitHub 설정
 

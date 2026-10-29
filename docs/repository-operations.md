@@ -4,34 +4,27 @@ GitHub 저장소 `sensibile/thesmothetai`의 설정과 PR 절차를 기록한다
 
 ## PR 플로우
 
-1. 작업 브랜치에서 변경하고 `go vet ./...`, `go test ./...`를 실행한다. gate 스크립트를 바꾸면 `python3 -m unittest discover -s scripts/tests`도 실행한다.
-2. PR을 만든다. `main`에는 직접 push할 수 없다. PR 제목과 본문에는 `@codex` 문자열을 쓰지 않는다.
-3. Codex가 PR 생성 리뷰를 스스로 시작한다. PR을 맡은 세션은 2분 동안 그 head에 대한 리뷰 요약 댓글(`codex-review-state`)이 붙는지 확인하고, 붙지 않을 때만 BOSS 계정(세션의 `gh` 인증 계정)으로 `@codex review` 댓글을 남긴다. PR 제목·본문·댓글에 `@codex` 문자열이 있으면, 백틱 안이라도 멘션으로 읽혀 리뷰 대신 Codex 클라우드 작업이 호출된다. 이때는 gate가 판정할 요약과 결과 표식(`codex-review-receipt`)이 남지 않는다(태극 PR #13~#16). 그래서 리뷰를 요청하는 댓글 말고는 이 문자열을 쓰지 않는다. 가리킬 때는 "Codex 리뷰 요청"처럼 풀어 쓴다.
-4. `Codex review gate` workflow는 PR head 커밋에 대한 Codex 리뷰 결과를 commit status `codex-review`로 남기는 판정만 한다. 리뷰를 요청하거나 머지하지 않는다. 근거는 `chatgpt-codex-connector[bot]` 요약 댓글의 `codex-review-state` 상태다. 판정은 다음과 같다.
-   - head 커밋에 대한 리뷰가 `completed`이고 미해소 지적이 없으면(`has_unresolved_findings: false`) success다. 미해소 지적이 있으면 failure, 그 밖에는 pending이다.
-   - `has_unresolved_findings: null`이면, 같은 head 커밋에 대한 Codex의 최신 결과 댓글이 "Didn't find any major issues"이고 Codex가 시작한 미해결 리뷰 thread가 0개일 때만 success다.
-   - 시간이 지나도 판정은 바뀌지 않는다. Codex가 그 head를 리뷰하지 않으면 pending에 머문다.
-   - 댓글이나 status 조회가 실패해 근거를 읽지 못하면 pending을 게시한 뒤 실패로 끝난다. 같은 head의 이전 success가 바뀐 리뷰 대신 머지 조건을 채우지 않게 하기 위해서다.
-   - Codex 요약 댓글이 삭제되거나 PR base가 바뀌면 gate가 이전 리뷰를 무효로 표시하는 댓글(head 표식 포함)을 남긴다. 무효 표시 이후 Codex가 요약을 갱신해야 다시 판정한다. 무효 표시 댓글을 남기지 못하면 `record` job이 pending을 게시한 뒤 실패로 끝난다. 그 pending status는 무효 표시를 대신하며, Codex 요약이 그보다 확실히 나중에 갱신돼야 무효가 풀린다. 같은 초면 무효로 본다.
-5. 리뷰 요청은 PR을 맡은 세션이 BOSS 계정으로 한다. Codex는 `github-actions[bot]`의 요청에는 응답하지 않았고(태극 PR #3, archon PR #12), 사람 계정 요청에는 13초~2분 안에 응답했다. 새 커밋을 push하면 Codex가 "New commits" 트리거로 다시 리뷰한다. 세션은 다음 경우에 그 head에 `@codex review`를 한 번 남긴다: PR을 열고 2분 안에 리뷰 요약이 붙지 않았을 때(3단계), 새 커밋을 push했을 때, gate가 무효 표시 댓글을 남겼을 때. 그 head에 대한 Codex 결과 댓글이 이미 있거나 리뷰가 `running`이면 남기지 않는다. 요청 뒤 10분 넘게 Codex가 시작하지 않거나 `running`에서 멈추면 한 번 더 요청하고, 그래도 응답이 없으면 BOSS에게 보고한다. 멈춤에는 Auto-fix 이벤트가 오지 않으므로 세션이 직접 다시 확인한다. 응답이 없다고 리뷰 없이 머지하지 않는다.
-6. 머지도 PR을 맡은 세션이 한다. PR head의 `codex-review`가 success이고 미해결 리뷰 thread가 없으면 `gh pr merge <번호> --squash --auto --match-head-commit <리뷰한 head SHA>`로 auto-merge를 켠다. 머지는 리뷰한 커밋으로 고정되고, 나머지 필수 체크가 통과하면 GitHub가 머지한다. draft PR이나 `no-auto-merge` label이 붙은 PR에는 켜지 않는다. 세션이 없는 PR은 `codex-review`가 success여도 사람이 머지할 때까지 대기한다.
+2026-10-29 BOSS가 태극 #22와 같이 GitHub의 Codex 리뷰 gate(`codex-review` status)를 정리하기로 결정했다("둘 다 진행"). 대체 필수 체크는 Go CI의 `go` job으로, 게이트 단위 테스트(`Gate tests`)는 게이트와 함께 지우기로 BOSS가 이 저장소 세션에서 골랐다. 리뷰는 push 전 로컬 단계에서 하고, 머지 조건은 CI 검증이다. 이전 gate의 설계와 관측 근거는 Git 이력의 이 문서와 PR #6~#10에 남아 있다.
+
+1. 작업 브랜치에서 변경하고 `go build ./...`, `go vet ./...`, `go test ./...`를 실행한다.
+2. push 전에 PR 누적 범위(`origin/main`과의 merge-base부터 head까지)를 로컬에서 리뷰한다. 코드나 실행 동작에 영향을 주는 변경은 `taeguk_codex_cross_reviewer`와 `taeguk_codex_security_reviewer`를 `taeguk-codex-local-review` 절차로 실행한다. 문서만 바뀐 변경은 보안 리뷰를 NOT_APPLICABLE로 남긴다. 지적은 반영하거나 반영하지 않은 이유를 남긴다.
+3. PR 본문에 검증 결과와 로컬 리뷰 결과(대상 SHA, 모델과 effort, 지적과 처리)를 적는다. 제목, 본문, 댓글에는 `@codex` 문자열을 쓰지 않는다. 코드 표기 안의 것도 멘션으로 읽혀 Codex 클라우드 작업을 부른다(태극 PR #13~#16).
+4. 그 head SHA에 대해 2단계의 필수 로컬 리뷰가 실제로 끝났는지 확인한다. CLI 로그인 실패, timeout, 빈 출력 등으로 NOT_RUN이나 UNKNOWN이면 auto-merge를 켜지 않고 원인을 해소하거나 BOSS에게 보고한다. 확인되면 PR을 만든 세션이 `gh pr merge <번호> --squash --auto --match-head-commit <리뷰한 head SHA>`로 auto-merge를 켠다. 필수 체크가 통과하고 리뷰 thread가 모두 해소되고 PR이 최신 `main`을 포함하면 GitHub가 머지한다. draft PR이나 `no-auto-merge` label이 붙은 PR에는 켜지 않는다. 이 opt-out은 세션이 지키는 운영 규칙이며 GitHub 머지 조건이 아니다.
+5. 새 커밋을 올릴 때는 먼저 `gh pr merge <번호> --disable-auto`로 auto-merge를 끈다. GitHub는 쓰기 권한자가 push해도 auto-merge를 유지하므로, 끄지 않으면 리뷰하지 않은 head가 머지될 수 있다. 그다음 push 전에 2단계의 로컬 리뷰를 새 누적 범위로 하고, 리뷰 반영으로 SHA가 바뀌면 다시 리뷰한다. 리뷰한 SHA를 push한 뒤 4단계로 다시 켠다.
+6. `main`이 앞서 나가 PR이 뒤처지면 먼저 `gh pr merge <번호> --disable-auto`로 auto-merge를 끄고, `gh pr view <번호> --json autoMergeRequest`가 `null`인지 확인한 뒤 `gh pr update-branch`로 갱신한다. `--match-head-commit`은 켤 때의 head만 확인할 뿐 이후 head 변경을 막지 않기 때문이다. 갱신 뒤에는 PR 누적 diff가 같아도 2단계의 로컬 리뷰를 새 head로 다시 한 뒤 4단계로 켠다.
+
+GitHub의 Codex 자동 리뷰는 저장소가 아니라 Codex 설정에서 켜져 있어 계속 댓글을 달 수 있다. 머지 조건은 아니지만 ruleset이 리뷰 thread 해소를 요구하므로, 세션은 thread를 판정해 반영하거나 이유를 답한 뒤 해소한다. 리뷰 도구의 결과는 검토 보조 증거이며 요구사항 충족 판정을 대신하지 않는다. 로컬 리뷰 실행 여부는 GitHub가 강제하지 않는다. 세션이 지키는 절차다.
 
 CodeQL default setup이 PR을 분석하지 않아 머지가 막히면 빈 커밋을 push해 분석을 다시 실행한다. 저장소 첫 설정 직후 연 PR에서 한 번 발생했다.
-
-gate는 태극(sensibile/taeguk) main `c759d26`의 `scripts/codex_review_gate.py`, `tests/test_codex_review_gate.py`(여기서는 `scripts/tests/`), `.github/workflows/codex-review-gate.yml`을 그대로 가져왔다. gate workflow는 `pull_request_target`과 `issue_comment`로만 실행된다. 두 이벤트 모두 기본 브랜치의 workflow와 스크립트를 실행하므로 PR이 자기 판정 코드를 바꿀 수 없다. 그래서 gate를 처음 넣는 PR에서는 gate가 돌지 않는다. 요약 댓글의 상태 표식은 Codex의 공개 API가 아니다. 형식이 바뀌어 읽을 수 없으면 gate는 pending에 머물고, 사람이 Codex 결과를 확인해 처리한다. gate는 저장소 writer를 신뢰하는 전제의 자동화이며 writer에 대한 보안 경계는 아니다. fork PR과 기본 브랜치가 아닌 base로 향하는 PR은 처리하지 않는다. 스크립트 단위 테스트는 `.github/workflows/gate-tests.yml`이 돌린다.
 
 ## GitHub 설정
 
 2026-10-23에 적용하고 API 조회로 반영을 확인했다.
 
-- ruleset `main protection`(id 25699905): 기본 브랜치에 적용한다. PR 필수, 필요 승인 0, 리뷰 스레드 해소 필수, squash 머지만 허용, CodeQL error 또는 high 이상 보안 경고 시 머지 차단, 브랜치 삭제와 force push 금지, bypass 대상 없음.
-- 머지 방식: squash만 허용한다. 커밋 제목은 PR 제목, 본문은 PR 본문을 쓴다. 머지 후 브랜치를 자동 삭제한다. auto-merge를 허용한다.
+- ruleset `main protection`(id 25699905): 기본 브랜치에 적용한다. PR 필수, 필요 승인 0, 리뷰 스레드 해소 필수, squash 머지만 허용, `go` 체크 통과 필수, 머지 전 최신 `main` 포함 필수(`strict_required_status_checks_policy`), CodeQL error 또는 high 이상 보안 경고 시 머지 차단, 브랜치 삭제와 force push 금지, bypass 대상 없음.
+- 머지 방식: squash만 허용한다. 커밋 제목은 PR 제목, 본문은 PR 본문을 쓴다. 머지 후 브랜치를 자동 삭제한다. auto-merge를 허용한다. `no-auto-merge` label이 있다.
 - 보안: Dependabot alerts와 security updates, CodeQL default setup(go), secret scanning과 push protection.
 - Codex 리뷰: ChatGPT Codex Connector 앱의 저장소 접근과 Codex cloud 설정의 Code review를 켰다. 이 설정은 GitHub가 아니라 ChatGPT 계정에서 관리한다.
-- 2026-10-26 추가: ruleset 필수 체크에 commit status `codex-review`(GitHub Actions, integration 15368)를 넣고, 머지 전에 PR 브랜치가 최신 `main`을 포함하도록 요구한다(`strict_required_status_checks_policy`). 태극과 같은 구성이다. gate가 PR #7에서 status를 게시하는 것을 확인한 뒤 적용했다. `no-auto-merge` label을 만들었다.
+- 변경 이력: 2026-10-26 필수 체크 `codex-review`와 최신 `main` 포함 요구를 추가했다. 2026-10-29 `codex-review`를 빼고 `go`를 넣었다.
 
-필요 승인을 0으로 둔 이유는 작업자와 PR 작성자가 같은 계정이고 GitHub가 자기 PR 승인을 허용하지 않기 때문이다.
-
-## 아직 걸지 않은 규칙
-
-Go 검사(`go vet`, `go test`)는 아직 CI workflow가 없어 필수 체크가 아니다. `gate-tests`는 gate 스크립트가 바뀔 때만 도는 workflow라 필수 체크로 걸지 않는다.
+필요 승인을 0으로 둔 이유는 작업자와 PR 작성자가 같은 계정이고 GitHub가 자기 PR 승인을 허용하지 않기 때문이다. 필수 체크 이름 `go`는 `.github/workflows/go.yml`의 job 이름에 의존한다. 이름을 바꾸면 ruleset도 함께 갱신해야 한다.

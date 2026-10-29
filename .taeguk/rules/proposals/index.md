@@ -1,12 +1,24 @@
 # 미승인 규칙 후보
 
-Taeguk 저장소의 [기존 규칙 목록](https://github.com/sensibile/taeguk/blob/8dbf62681faf14771c86b86dddc2d1b5f0378d33/docs/research/archive/규칙-목록.md) 후보 중 현행 registry에 등록되지 않은 항목은 계속 제안 상태다. archive는 원본을 보존하며 현행 규칙의 승인 목록으로 사용하지 않는다.
+Taeguk 저장소의 [기존 규칙 목록](https://github.com/sensibile/taeguk/blob/57afff5df4ca6432d8ce83a9b38691f327778644/docs/research/archive/규칙-목록.md) 후보 중 현행 registry에 등록되지 않은 항목은 계속 제안 상태다. archive는 원본을 보존하며 현행 규칙의 승인 목록으로 사용하지 않는다.
 
 ## GOV-005
 
 작업·정리·재시도 한도는 목적과 비용에 맞춰 정할 후보다. 전역 횟수·시간·예산은 합의하지 않았다. 실제 반복 작업에서 실패 패턴과 비용을 관측한 뒤 제안한다.
 
 새 개정안은 Taeguk 저장소에서 작성하며 현재 ID·버전, 문제 사례, 변경 전후 판정, 정상·실패 사례 검사, 비용·권한 영향, 전환·되돌림 조건을 기록한다. BOSS 확인 전에는 현행 기준을 유지한다. 스킬: taeguk-propose-rule-change.
+
+## VER-006 후보
+
+커버리지를 빈 곳을 찾는 측정 도구로만 쓰고 목표·수용 기준으로 쓰지 않는 규칙 후보다. [커버리지 측정 도구 개정안](coverage-as-instrument.md)이 BOSS 확인을 기다린다.
+
+## archon 시험 프로젝트 추가
+
+2026-10-29 승인되어 REQ-001 1.2와 REQ-007 1.1로 현행 규칙에 반영했다. [archon 시험 프로젝트 추가 개정안](archon-pilot.md)은 개정 근거로 보존한다.
+
+## VER-005
+
+2026-10-28 승인되어 VER-005 1.0으로 현행 규칙에 반영했다. [리뷰 반복 종료·상향 기준 개정안](review-loop-exit.md)은 개정 근거로 보존한다.
 
 ## 의도·요구사항 기록
 
